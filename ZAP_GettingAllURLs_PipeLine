@@ -1,0 +1,37 @@
+Jenkinsfile
+
+pipeline {
+    agent none
+    stages {
+        stage('Run Tests') {
+            parallel {
+                stage('Starting ZAP in Daemon Mode') {
+                    agent {
+                        label "Zap Start"
+                    }
+                    steps {
+                        bat "cd C:\Program^ Files\OWASP\Zed^ Attack^ Proxy"
+                        bat "zap.bat -daemon -host 127.0.0.1 -port 8887 -config api.disablekey=true -session D:\Zap\SmartChannel\SC_Estab_Session.session > tempFile.txt"
+                    }
+                    post {
+                        always {
+                        }
+                    }
+                }
+                stage('Getting All URLs') {
+                    agent {
+                        label "Get All URLs"
+                    }
+                    steps {
+                        bat "timeout 10"
+                        bat "curl --location --request GET 'http://localhost:8887/JSON/core/view/urls/?baseurl=https%3A%2F%2Fosppreprdext.emaratech.ae%2F'"
+                    }
+                    post {
+                        always {
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
